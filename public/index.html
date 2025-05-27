@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Receipt Reader</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background: #f9f9f9;
+        padding: 2rem;
+        max-width: 800px;
+        margin: auto;
+      }
+      h1 {
+        margin-bottom: 1rem;
+      }
+      #dropzone {
+        border: 2px dashed #aaa;
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        background: white;
+        margin-bottom: 20px;
+        color: #555;
+      }
+      input[type="file"] {
+        display: block;
+        margin: 1rem 0;
+      }
+      button {
+        padding: 10px 20px;
+        border: none;
+        background: #0070f3;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      pre {
+        background: #222;
+        color: #0f0;
+        padding: 1rem;
+        border-radius: 10px;
+        max-height: 400px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📷 Receipt Reader</h1>
+
+    <div id="dropzone" contenteditable>
+      📋 Paste (Ctrl+V) or drag an image here
+    </div>
+
+    <form id="upload-form">
+      <input type="file" name="receipt" accept="image/*" required />
+      <button type="submit">Upload</button>
+    </form>
+
+    <h3>📄 Extracted Data</h3>
+    <pre id="output">No data yet.</pre>
+
+    <script>
+      const dropzone = document.getElementById("dropzone");
+      const form = document.getElementById("upload-form");
+      const fileInput = form.querySelector("input[type=file]");
+      const output = document.getElementById("output");
+
+      // Paste from clipboard
+      dropzone.addEventListener("paste", async (e) => {
+        const item = [...e.clipboardData.items].find(
+          (i) => i.type.indexOf("image") !== -1
+        );
+        if (!item) return alert("No image in clipboard.");
+        const blob = item.getAsFile();
+        await uploadImage(blob);
+      });
+
+      // Drag & drop
+      dropzone.addEventListener("dragover", (e) => e.preventDefault());
+      dropzone.addEventListener("drop", async (e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+        await uploadImage(file);
+      });
+
+      // Form submission
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const file = fileInput.files[0];
+        if (!file) return;
+        await uploadImage(file);
+      });
+
+      // Upload logic
+      async function uploadImage(file) {
+        const formData = new FormData();
+        formData.append("receipt", file);
+
+        output.textContent = "⏳ Processing...";
+        try {
+          const res = await fetch("/upload", {
+            method: "POST",
+            body: formData,
+          });
+          const json = await res.json();
+          output.textContent = JSON.stringify(json.formatted, null, 2);
+        } catch (err) {
+          output.textContent = "❌ Error uploading image";
+          console.error(err);
+        }
+      }
+    </script>
+  </body>
+</html>
