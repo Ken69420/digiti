@@ -39,9 +39,9 @@ Tired of spending hours manually entering receipt data? This project was born ou
 
 1. Start the server:
    ```bash
-   node index.js
+   node server.js
    ```
-2. Upload receipt images via the provided endpoint or interface.
+2. Upload receipt images via the provided endpoint or interface (localhost:3000).
 
 ## Notes
 
