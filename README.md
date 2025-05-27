@@ -50,4 +50,4 @@ Tired of spending hours manually entering receipt data? This project was born ou
 
 ## License
 
-ISC
+MIT
